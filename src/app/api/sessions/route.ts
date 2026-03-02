@@ -1,3 +1,5 @@
+export const runtime = 'edge'; // ADD THIS LINE
+
 import { createClient } from "@/lib/supabase/server";
 import { rateLimit } from "@/lib/rate-limit";
 import { NextResponse } from "next/server";
