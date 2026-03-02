@@ -7,6 +7,7 @@ import { Loader2, Sparkles } from "lucide-react";
 export function PromptInput() {
   const [prompt, setPrompt] = useState("");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -14,6 +15,7 @@ export function PromptInput() {
     if (!prompt.trim() || loading) return;
 
     setLoading(true);
+    setError(null);
     try {
       const res = await fetch("/mvp/api/sessions", {
         method: "POST",
@@ -22,19 +24,26 @@ export function PromptInput() {
       });
 
       if (!res.ok) {
-        throw new Error("Failed to create session");
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || `Request failed (${res.status})`);
       }
 
       const { sessionId } = await res.json();
       router.push(`/session/${sessionId}`);
     } catch (err) {
       console.error(err);
+      setError(err instanceof Error ? err.message : "Something went wrong");
       setLoading(false);
     }
   };
 
   return (
     <form onSubmit={handleSubmit} className="mx-auto w-full max-w-2xl">
+      {error && (
+        <div className="mb-3 rounded-lg bg-danger/10 border border-danger/20 px-4 py-3 text-sm text-danger">
+          {error}
+        </div>
+      )}
       <div className="glass-card p-2 !cursor-default" style={{ cursor: "default" }}>
         <textarea
           value={prompt}
