@@ -31,7 +31,7 @@ export function SessionView({ session, rounds: initialRounds }: SessionViewProps
     setError(null);
 
     try {
-      const res = await fetch("/api/breakdown", {
+      const res = await fetch("/mvp/api/breakdown", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -70,7 +70,7 @@ export function SessionView({ session, rounds: initialRounds }: SessionViewProps
   const handleStatusChange = async (newStatus: SessionStatus) => {
     setIsUpdatingStatus(true);
     try {
-      const res = await fetch("/api/sessions", {
+      const res = await fetch("/mvp/api/sessions", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ sessionId: session.id, status: newStatus }),
@@ -98,7 +98,7 @@ export function SessionView({ session, rounds: initialRounds }: SessionViewProps
     );
 
     try {
-      const res = await fetch("/api/steps", {
+      const res = await fetch("/mvp/api/steps", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ stepId, isCompleted }),

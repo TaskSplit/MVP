@@ -15,7 +15,7 @@ export function PromptInput() {
 
     setLoading(true);
     try {
-      const res = await fetch("/api/sessions", {
+      const res = await fetch("/mvp/api/sessions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ prompt: prompt.trim() }),
