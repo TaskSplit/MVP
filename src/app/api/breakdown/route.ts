@@ -80,11 +80,11 @@ Rules:
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${openRouterKey}`,
-          "HTTP-Referer": "http://localhost:3000",
+          "HTTP-Referer": "https://tasksplitai.com/mvp/",
           "X-Title": "TaskSplit",
         },
         body: JSON.stringify({
-          model: "google/gemini-2.0-flash-001",
+          model: "google/gemini-2.5-flash-lite",
           messages: [
             { role: "system", content: systemPrompt },
             { role: "user", content: prompt },

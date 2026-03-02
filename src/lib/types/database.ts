@@ -1,8 +1,11 @@
+export type SessionStatus = "active" | "completed";
+
 export interface Session {
   id: string;
   user_id: string;
   title: string;
   prompt: string;
+  status: SessionStatus;
   created_at: string;
 }
 

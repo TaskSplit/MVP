@@ -24,6 +24,7 @@ export default async function DashboardPage() {
     title: s.title,
     prompt: s.prompt,
     created_at: s.created_at,
+    status: s.status ?? "active",
     round_count: Array.isArray(s.rounds) ? s.rounds.length : 0,
   }));
 

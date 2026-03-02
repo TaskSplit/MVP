@@ -5,7 +5,9 @@ import { Session, RoundWithSteps } from "@/lib/types/database";
 import { ProgressBar } from "@/components/ProgressBar";
 import { RoundCircleNav } from "@/components/RoundCircleNav";
 import { RoundDetailView } from "@/components/RoundDetailView";
-import { Loader2, ChevronLeft, ChevronRight } from "lucide-react";
+import { Loader2, ChevronLeft, ChevronRight, CheckCircle2, RotateCcw } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { SessionStatus } from "@/lib/types/database";
 
 interface SessionViewProps {
   session: Session;
@@ -17,6 +19,9 @@ export function SessionView({ session, rounds: initialRounds }: SessionViewProps
   const [activeRound, setActiveRound] = useState(0);
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [status, setStatus] = useState<SessionStatus>(session.status ?? "active");
+  const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
+  const router = useRouter();
 
   // Check if we need to generate the breakdown (no rounds yet)
   const needsGeneration = initialRounds.length === 0;
@@ -59,6 +64,27 @@ export function SessionView({ session, rounds: initialRounds }: SessionViewProps
     (acc, r) => acc + r.steps.filter((s) => s.is_completed).length,
     0
   );
+
+  const isCompleted = status === "completed";
+
+  const handleStatusChange = async (newStatus: SessionStatus) => {
+    setIsUpdatingStatus(true);
+    try {
+      const res = await fetch("/api/sessions", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sessionId: session.id, status: newStatus }),
+      });
+      if (res.ok) {
+        setStatus(newStatus);
+        router.refresh();
+      }
+    } catch {
+      // Silently fail
+    } finally {
+      setIsUpdatingStatus(false);
+    }
+  };
 
   const handleStepToggle = async (stepId: string, isCompleted: boolean) => {
     // Optimistic update
@@ -139,12 +165,44 @@ export function SessionView({ session, rounds: initialRounds }: SessionViewProps
 
   return (
     <div>
+      {/* Completed banner */}
+      {isCompleted && (
+        <div className="mb-6 flex items-center justify-between rounded-lg border border-success/20 bg-success/10 px-5 py-3">
+          <span className="flex items-center gap-2 text-sm font-medium text-success">
+            <CheckCircle2 className="h-4 w-4" />
+            This task is finished
+          </span>
+          <button
+            onClick={() => handleStatusChange("active")}
+            disabled={isUpdatingStatus}
+            className="flex items-center gap-1.5 rounded-md px-3 py-1 text-xs font-medium text-muted hover:text-foreground transition-colors"
+          >
+            <RotateCcw className="h-3.5 w-3.5" />
+            Reopen
+          </button>
+        </div>
+      )}
+
       {/* Header */}
       <div className="mb-8">
-        <h1 className="mb-2 text-3xl font-bold text-foreground">
-          {session.title || "Untitled Session"}
-        </h1>
-        <p className="mb-6 text-muted">{session.prompt}</p>
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <h1 className="mb-2 text-3xl font-bold text-foreground">
+              {session.title || "Untitled Session"}
+            </h1>
+            <p className="mb-6 text-muted">{session.prompt}</p>
+          </div>
+          {!isCompleted && rounds.length > 0 && (
+            <button
+              onClick={() => handleStatusChange("completed")}
+              disabled={isUpdatingStatus}
+              className="shrink-0 flex items-center gap-2 rounded-lg bg-success/20 px-4 py-2 text-sm font-semibold text-success transition-all hover:bg-success/30 disabled:opacity-50"
+            >
+              <CheckCircle2 className="h-4 w-4" />
+              Finish Task
+            </button>
+          )}
+        </div>
         <ProgressBar completed={completedSteps} total={totalSteps} />
       </div>
 
