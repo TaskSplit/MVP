@@ -28,7 +28,7 @@ export default function AuthPage() {
       if (error) {
         setError(error.message);
       } else {
-        window.location.href = "/";
+        window.location.href = "/mvp/";
       }
     } else {
       const { error } = await supabase.auth.signUp({
@@ -49,7 +49,7 @@ export default function AuthPage() {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
+        redirectTo: `${window.location.origin}/mvp/auth/callback`,
       },
     });
     if (error) {
