@@ -7,15 +7,16 @@ interface RateLimitEntry {
 
 const store = new Map<string, RateLimitEntry>();
 
-// Clean up expired entries every 5 minutes
-setInterval(() => {
+// Lazy cleanup: remove expired entries when the map exceeds a threshold
+function cleanupExpired() {
+  if (store.size < 100) return;
   const now = Date.now();
   for (const [key, entry] of store) {
     if (now > entry.resetAt) {
       store.delete(key);
     }
   }
-}, 5 * 60 * 1000);
+}
 
 interface RateLimitOptions {
   /** Max requests allowed in the window */
@@ -33,6 +34,7 @@ export function rateLimit(
   route: string,
   { maxRequests, windowSec }: RateLimitOptions
 ): NextResponse | null {
+  cleanupExpired();
   const key = `${userId}:${route}`;
   const now = Date.now();
   const entry = store.get(key);
