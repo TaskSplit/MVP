@@ -1,11 +1,11 @@
 export const runtime = 'edge';
 
-import { createClient } from "@/lib/supabase/server";
+import { createRouteHandlerClient } from "@/lib/supabase/route";
 import { rateLimit } from "@/lib/rate-limit";
 import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
-  const supabase = await createClient();
+  const { supabase, applyResponseCookies } = createRouteHandlerClient(request);
 
   const {
     data: { user },
@@ -184,7 +184,7 @@ Rules:
       }
     }
 
-    return NextResponse.json({ success: true, breakdown });
+    return applyResponseCookies(NextResponse.json({ success: true, breakdown }));
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     console.error("AI breakdown error:", message, err);

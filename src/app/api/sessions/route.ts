@@ -1,11 +1,11 @@
 export const runtime = 'edge';
 
-import { createClient } from "@/lib/supabase/server";
+import { createRouteHandlerClient } from "@/lib/supabase/route";
 import { rateLimit } from "@/lib/rate-limit";
 import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
-  const supabase = await createClient();
+  const { supabase, applyResponseCookies } = createRouteHandlerClient(request);
 
   const {
     data: { user },
@@ -45,11 +45,11 @@ export async function POST(request: Request) {
     );
   }
 
-  return NextResponse.json({ sessionId: session.id });
+  return applyResponseCookies(NextResponse.json({ sessionId: session.id }));
 }
 
 export async function PATCH(request: Request) {
-  const supabase = await createClient();
+  const { supabase, applyResponseCookies } = createRouteHandlerClient(request);
 
   const {
     data: { user },
@@ -92,5 +92,5 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  return NextResponse.json({ success: true });
+  return applyResponseCookies(NextResponse.json({ success: true }));
 }
