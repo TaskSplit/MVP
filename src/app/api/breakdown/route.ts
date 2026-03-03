@@ -106,13 +106,38 @@ Rules:
     const responseText = aiData.choices?.[0]?.message?.content;
 
     if (!responseText) {
+      console.error("No AI response content. Full response:", JSON.stringify(aiData));
       return NextResponse.json(
         { error: "No response from AI" },
         { status: 502 }
       );
     }
 
-    const breakdown = JSON.parse(responseText);
+    // Strip markdown code fences if the model wraps the JSON
+    let jsonString = responseText.trim();
+    const fenceMatch = jsonString.match(/^```(?:json)?\s*\n?([\s\S]*?)\n?\s*```$/);
+    if (fenceMatch) {
+      jsonString = fenceMatch[1].trim();
+    }
+
+    let breakdown;
+    try {
+      breakdown = JSON.parse(jsonString);
+    } catch (parseErr) {
+      console.error("Failed to parse AI JSON. Raw content:", responseText);
+      return NextResponse.json(
+        { error: "AI returned invalid JSON. Please try again." },
+        { status: 502 }
+      );
+    }
+
+    if (!breakdown.rounds || !Array.isArray(breakdown.rounds)) {
+      console.error("AI response missing rounds:", JSON.stringify(breakdown));
+      return NextResponse.json(
+        { error: "AI returned an unexpected format. Please try again." },
+        { status: 502 }
+      );
+    }
 
     // Update session title
     await supabase
@@ -159,9 +184,10 @@ Rules:
 
     return NextResponse.json({ success: true, breakdown });
   } catch (err) {
-    console.error("AI breakdown error:", err);
+    const message = err instanceof Error ? err.message : String(err);
+    console.error("AI breakdown error:", message, err);
     return NextResponse.json(
-      { error: "Failed to generate breakdown" },
+      { error: `Failed to generate breakdown: ${message}` },
       { status: 500 }
     );
   }

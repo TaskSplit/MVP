@@ -41,8 +41,8 @@ export function SessionView({ session, rounds: initialRounds }: SessionViewProps
       });
 
       if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || "Failed to generate breakdown");
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || `Failed to generate breakdown (${res.status})`);
       }
 
       // Reload the page to get fresh data
