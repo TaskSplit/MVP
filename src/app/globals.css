@@ -116,3 +116,46 @@ body::after {
   box-shadow: 0 0 12px rgba(124, 58, 237, 0.5);
   transition: width 0.5s ease;
 }
+
+/* Plit AI Assistant */
+.plit-button {
+  background: linear-gradient(135deg, #7c3aed, #6d28d9);
+  box-shadow:
+    0 4px 20px rgba(124, 58, 237, 0.4),
+    0 0 40px rgba(124, 58, 237, 0.15);
+  transition: all 0.3s ease;
+}
+
+.plit-button:hover {
+  box-shadow:
+    0 6px 28px rgba(124, 58, 237, 0.5),
+    0 0 60px rgba(124, 58, 237, 0.2);
+  transform: translateY(-2px);
+}
+
+.plit-panel {
+  width: min(400px, calc(100vw - 3rem));
+  height: min(520px, calc(100vh - 10rem));
+  background: rgba(10, 10, 18, 0.95);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+}
+
+.plit-messages {
+  scrollbar-width: thin;
+  scrollbar-color: #1e1a2e transparent;
+}
+
+.plit-typing-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #6b6490;
+  animation: plit-bounce 0.8s infinite ease-in-out;
+}
+
+@keyframes plit-bounce {
+  0%, 60%, 100% { transform: translateY(0); }
+  30% { transform: translateY(-4px); }
+}

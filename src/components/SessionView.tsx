@@ -8,6 +8,7 @@ import { RoundDetailView } from "@/components/RoundDetailView";
 import { Loader2, ChevronLeft, ChevronRight, CheckCircle2, RotateCcw } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { SessionStatus } from "@/lib/types/database";
+import { PlitChat } from "@/components/PlitChat";
 
 interface SessionViewProps {
   session: Session;
@@ -246,6 +247,16 @@ export function SessionView({ session, rounds: initialRounds }: SessionViewProps
           </div>
         </div>
       )}
+
+      {/* Plit AI Assistant */}
+      <PlitChat
+        sessionId={session.id}
+        sessionTitle={session.title || "Untitled Session"}
+        prompt={session.prompt}
+        rounds={rounds}
+        activeRound={activeRound}
+        onActionComplete={() => window.location.reload()}
+      />
     </div>
   );
 }
