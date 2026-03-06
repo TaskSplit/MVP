@@ -28,6 +28,11 @@ interface PlitRequest {
       }[];
     }[];
     activeRound: number;
+    files?: {
+      file_name: string;
+      file_size: number;
+      mime_type: string;
+    }[];
   };
 }
 
@@ -91,6 +96,10 @@ export async function POST(request: Request) {
       })
       .join("\n\n");
 
+    const filesDescription = context.files && context.files.length > 0
+      ? `\nATTACHED FILES:\n${context.files.map((f) => `- ${f.file_name} (${f.mime_type}, ${(f.file_size / 1024).toFixed(0)}KB)`).join("\n")}\nThe AI breakdown was generated with these files as context. Reference them when relevant.`
+      : "";
+
     const systemPrompt = `You are Plit, the friendly AI assistant for TaskSplit. You help users work through their task breakdowns.
 
 The user is working on a project. Here's the context:
@@ -100,6 +109,7 @@ ORIGINAL PROMPT: ${context.prompt}
 
 CURRENT BREAKDOWN:
 ${roundsDescription}
+${filesDescription}
 
 YOUR CAPABILITIES:
 1. **Help & Guidance**: Answer questions, explain steps, give tips, and help users who are stuck on any step.

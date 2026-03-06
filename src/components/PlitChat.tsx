@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
-import { RoundWithSteps } from "@/lib/types/database";
+import { RoundWithSteps, SessionFile } from "@/lib/types/database";
 import { cn } from "@/lib/utils";
 import { Send, X, Loader2, MessageCircle } from "lucide-react";
 
@@ -16,6 +16,7 @@ interface PlitChatProps {
   prompt: string;
   rounds: RoundWithSteps[];
   activeRound: number;
+  files?: SessionFile[];
   onActionComplete: () => void;
 }
 
@@ -25,6 +26,7 @@ export function PlitChat({
   prompt,
   rounds,
   activeRound,
+  files = [],
   onActionComplete,
 }: PlitChatProps) {
   const [isOpen, setIsOpen] = useState(false);
@@ -86,6 +88,11 @@ export function PlitChat({
               })),
             })),
             activeRound,
+            files: files.map((f) => ({
+              file_name: f.file_name,
+              file_size: f.file_size,
+              mime_type: f.mime_type,
+            })),
           },
         }),
       });

@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { Navbar } from "@/components/Navbar";
 import { SessionView } from "@/components/SessionView";
 import { notFound } from "next/navigation";
-import { RoundWithSteps } from "@/lib/types/database";
+import { RoundWithSteps, SessionFile } from "@/lib/types/database";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
@@ -49,6 +49,13 @@ export default async function SessionPage({ params }: SessionPageProps) {
     ),
   }));
 
+  // Fetch attached files
+  const { data: sessionFiles } = await supabase
+    .from("session_files")
+    .select("*")
+    .eq("session_id", id)
+    .order("created_at", { ascending: true });
+
   return (
     <div className="min-h-screen">
       <Navbar userEmail={user?.email} />
@@ -65,6 +72,7 @@ export default async function SessionPage({ params }: SessionPageProps) {
         <SessionView
           session={session}
           rounds={roundsWithSortedSteps}
+          files={(sessionFiles ?? []) as SessionFile[]}
         />
       </main>
     </div>

@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { Session, RoundWithSteps } from "@/lib/types/database";
+import { Session, RoundWithSteps, SessionFile } from "@/lib/types/database";
 import { ProgressBar } from "@/components/ProgressBar";
 import { RoundCircleNav } from "@/components/RoundCircleNav";
 import { RoundDetailView } from "@/components/RoundDetailView";
-import { Loader2, ChevronLeft, ChevronRight, CheckCircle2, RotateCcw } from "lucide-react";
+import { Loader2, ChevronLeft, ChevronRight, CheckCircle2, RotateCcw, FileText, Paperclip } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { SessionStatus } from "@/lib/types/database";
 import { PlitChat } from "@/components/PlitChat";
@@ -13,9 +13,10 @@ import { PlitChat } from "@/components/PlitChat";
 interface SessionViewProps {
   session: Session;
   rounds: RoundWithSteps[];
+  files?: SessionFile[];
 }
 
-export function SessionView({ session, rounds: initialRounds }: SessionViewProps) {
+export function SessionView({ session, rounds: initialRounds, files = [] }: SessionViewProps) {
   const [rounds, setRounds] = useState<RoundWithSteps[]>(initialRounds);
   const [activeRound, setActiveRound] = useState(0);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -191,7 +192,23 @@ export function SessionView({ session, rounds: initialRounds }: SessionViewProps
             <h1 className="mb-2 text-3xl font-bold text-foreground">
               {session.title || "Untitled Session"}
             </h1>
-            <p className="mb-6 text-muted">{session.prompt}</p>
+            <p className="text-muted">{session.prompt}</p>
+            {/* Attached files */}
+            {files.length > 0 && (
+              <div className="mt-3 flex flex-wrap items-center gap-2">
+                <Paperclip className="h-3.5 w-3.5 text-muted" />
+                {files.map((file) => (
+                  <span
+                    key={file.id}
+                    className="inline-flex items-center gap-1 rounded-md bg-accent/10 border border-accent/15 px-2 py-0.5 text-xs text-accent-light"
+                  >
+                    <FileText className="h-3 w-3" />
+                    {file.file_name}
+                  </span>
+                ))}
+              </div>
+            )}
+            <div className="mb-6" />
           </div>
           {!isCompleted && rounds.length > 0 && (
             <button
@@ -255,6 +272,7 @@ export function SessionView({ session, rounds: initialRounds }: SessionViewProps
         prompt={session.prompt}
         rounds={rounds}
         activeRound={activeRound}
+        files={files}
         onActionComplete={() => window.location.reload()}
       />
     </div>

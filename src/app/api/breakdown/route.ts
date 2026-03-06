@@ -40,6 +40,46 @@ export async function POST(request: Request) {
   }
 
   try {
+    // Fetch attached files and read their text content
+    const { data: sessionFiles } = await supabase
+      .from("session_files")
+      .select("file_name, storage_path, mime_type, file_size")
+      .eq("session_id", sessionId);
+
+    let fileContext = "";
+    if (sessionFiles && sessionFiles.length > 0) {
+      const fileContents: string[] = [];
+      for (const file of sessionFiles) {
+        // Only read text-based files (skip PDFs and large files)
+        if (file.file_size > 500_000) {
+          fileContents.push(`[File: ${file.file_name} — too large to read, ${(file.file_size / 1024).toFixed(0)}KB]`);
+          continue;
+        }
+        if (file.mime_type === "application/pdf") {
+          fileContents.push(`[File: ${file.file_name} — PDF document attached]`);
+          continue;
+        }
+        try {
+          const { data: blob } = await supabase.storage
+            .from("session-files")
+            .download(file.storage_path);
+          if (blob) {
+            const text = await blob.text();
+            // Truncate very long files to keep the AI prompt manageable
+            const truncated = text.length > 10_000
+              ? text.slice(0, 10_000) + "\n... (truncated)"
+              : text;
+            fileContents.push(`--- ${file.file_name} ---\n${truncated}`);
+          }
+        } catch {
+          fileContents.push(`[File: ${file.file_name} — could not read]`);
+        }
+      }
+      if (fileContents.length > 0) {
+        fileContext = `\n\nThe user also attached the following files for context:\n\n${fileContents.join("\n\n")}`;
+      }
+    }
+
     // Call OpenRouter API (free model)
     const openRouterKey = process.env.OPENROUTER_API_KEY;
 
@@ -87,7 +127,7 @@ Rules:
           model: "google/gemini-2.5-flash-lite",
           messages: [
             { role: "system", content: systemPrompt },
-            { role: "user", content: prompt },
+            { role: "user", content: prompt + fileContext },
           ],
           temperature: 0.7,
           response_format: { type: "json_object" },

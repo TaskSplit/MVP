@@ -34,6 +34,17 @@ export interface SessionWithRounds extends Session {
   rounds: RoundWithSteps[];
 }
 
+// Session file attachment
+export interface SessionFile {
+  id: string;
+  session_id: string;
+  file_name: string;
+  file_size: number;
+  mime_type: string;
+  storage_path: string;
+  created_at: string;
+}
+
 // AI response shape from Gemini
 export interface AIBreakdownResponse {
   title: string;
