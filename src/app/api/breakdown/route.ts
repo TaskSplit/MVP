@@ -108,8 +108,9 @@ Return a JSON object with this exact structure:
 
 Rules:
 - Create 2-4 rounds depending on project complexity
-- Each round should have 3-8 specific, actionable micro-steps
-- Steps should be concrete and achievable (not vague)
+- Each round should have 3-4 specific, actionable micro-steps
+- Keep step descriptions SHORT — aim for 5-10 words each (e.g. "Set up Next.js project", "Add login API route"). No explanations, just the action.
+- Don't over-engineer: skip obvious/trivial sub-steps. Focus on meaningful checkpoints a developer would actually track.
 - Round names should be just the phase name (e.g. "Project Setup", "Core Features"), without numbering — the UI handles numbering
 - Return ONLY valid JSON, no markdown or extra text`;
 
