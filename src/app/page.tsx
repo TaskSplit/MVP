@@ -1,5 +1,6 @@
 export const runtime = 'edge'; // ADD THIS LINE
 
+import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { Navbar } from "@/components/Navbar";
 import { PromptInput } from "@/components/PromptInput";
@@ -13,6 +14,10 @@ export default async function DashboardPage() {
   const {
     data: { user },
   } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect("/auth");
+  }
 
   const { data: sessions } = await supabase
     .from("sessions")

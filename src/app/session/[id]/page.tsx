@@ -3,7 +3,7 @@ export const runtime = 'edge';
 import { createClient } from "@/lib/supabase/server";
 import { Navbar } from "@/components/Navbar";
 import { SessionView } from "@/components/SessionView";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { RoundWithSteps, SessionFile } from "@/lib/types/database";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
@@ -21,6 +21,10 @@ export default async function SessionPage({ params }: SessionPageProps) {
   const {
     data: { user },
   } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect("/auth");
+  }
 
   // Fetch session
   const { data: session } = await supabase
