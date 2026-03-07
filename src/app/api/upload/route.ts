@@ -1,3 +1,5 @@
+export const runtime = "edge";
+
 import { createRouteHandlerClient } from "@/lib/supabase/route";
 import { rateLimit } from "@/lib/rate-limit";
 import { NextResponse } from "next/server";
