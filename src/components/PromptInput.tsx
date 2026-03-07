@@ -10,6 +10,36 @@ function formatFileSize(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
+const MAX_FILES = 10;
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+
+const ALLOWED_MIME_TYPES = new Set([
+  "text/plain", "text/markdown", "text/csv", "text/html", "text/css",
+  "application/json", "application/xml", "application/javascript",
+  "application/typescript", "application/pdf",
+]);
+
+const ALLOWED_EXTENSIONS = new Set([
+  ".txt", ".md", ".csv", ".json", ".xml", ".html", ".css",
+  ".js", ".ts", ".jsx", ".tsx", ".py", ".rb", ".go", ".rs",
+  ".java", ".c", ".cpp", ".h", ".hpp", ".sh", ".bash", ".zsh",
+  ".yaml", ".yml", ".toml", ".ini", ".cfg", ".env", ".sql",
+  ".graphql", ".prisma", ".svelte", ".vue", ".php", ".swift",
+  ".kt", ".dart", ".r", ".m", ".mm", ".lua", ".pl", ".ex",
+  ".exs", ".hs", ".scala", ".clj", ".erl", ".elm",
+]);
+
+const ACCEPT_ATTR = [
+  ...Array.from(ALLOWED_MIME_TYPES),
+  ...Array.from(ALLOWED_EXTENSIONS),
+].join(",");
+
+function isAllowedFile(file: File): boolean {
+  if (ALLOWED_MIME_TYPES.has(file.type)) return true;
+  const ext = file.name.toLowerCase().slice(file.name.lastIndexOf("."));
+  return ALLOWED_EXTENSIONS.has(ext);
+}
+
 export function PromptInput() {
   const [prompt, setPrompt] = useState("");
   const [files, setFiles] = useState<File[]>([]);
@@ -19,26 +49,37 @@ export function PromptInput() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
-  const MAX_FILES = 10;
-  const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
-
   const addFiles = useCallback((newFiles: FileList | File[]) => {
     const fileArray = Array.from(newFiles);
-    setFiles((prev) => {
-      const combined = [...prev];
-      for (const file of fileArray) {
-        if (combined.length >= MAX_FILES) break;
-        if (file.size > MAX_FILE_SIZE) {
-          setError(`"${file.name}" exceeds 10MB limit`);
-          continue;
-        }
-        // Avoid duplicates by name+size
-        if (!combined.some((f) => f.name === file.name && f.size === file.size)) {
-          combined.push(file);
-        }
+    let errorMsg: string | null = null;
+    const toAdd: File[] = [];
+
+    for (const file of fileArray) {
+      if (file.size > MAX_FILE_SIZE) {
+        errorMsg = `"${file.name}" exceeds 10MB limit`;
+        continue;
       }
-      return combined;
-    });
+      if (!isAllowedFile(file)) {
+        errorMsg = `"${file.name}" is not a supported file type`;
+        continue;
+      }
+      toAdd.push(file);
+    }
+
+    if (errorMsg) setError(errorMsg);
+
+    if (toAdd.length > 0) {
+      setFiles((prev) => {
+        const combined = [...prev];
+        for (const file of toAdd) {
+          if (combined.length >= MAX_FILES) break;
+          if (!combined.some((f) => f.name === file.name && f.size === file.size)) {
+            combined.push(file);
+          }
+        }
+        return combined;
+      });
+    }
   }, []);
 
   const removeFile = (index: number) => {
@@ -97,8 +138,7 @@ export function PromptInput() {
 
         if (!uploadRes.ok) {
           const data = await uploadRes.json().catch(() => ({}));
-          console.error("File upload error:", data.error);
-          // Continue to session even if upload fails - prompt still works
+          throw new Error(data.error || "File upload failed");
         }
       }
 
@@ -118,7 +158,7 @@ export function PromptInput() {
         </div>
       )}
       <div
-        className={`glass-card p-2 !cursor-default transition-all ${
+        className={`relative glass-card p-2 !cursor-default transition-all ${
           isDragging ? "border-accent/50 shadow-[0_0_20px_rgba(124,58,237,0.2)]" : ""
         }`}
         style={{ cursor: "default" }}
@@ -174,6 +214,7 @@ export function PromptInput() {
               ref={fileInputRef}
               type="file"
               multiple
+              accept={ACCEPT_ATTR}
               className="hidden"
               onChange={(e) => {
                 if (e.target.files) addFiles(e.target.files);

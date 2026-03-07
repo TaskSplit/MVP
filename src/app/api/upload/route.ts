@@ -86,10 +86,14 @@ export async function POST(request: Request) {
   }
 
   const uploaded: { id: string; file_name: string; file_size: number }[] = [];
+  const uploadedPaths: string[] = [];
 
   for (const file of files) {
     // Validate file size
     if (file.size > MAX_FILE_SIZE) {
+      if (uploadedPaths.length > 0) {
+        await supabase.storage.from("session-files").remove(uploadedPaths);
+      }
       return NextResponse.json(
         { error: `File "${file.name}" exceeds 10MB limit` },
         { status: 400 }
@@ -98,6 +102,9 @@ export async function POST(request: Request) {
 
     // Validate file type
     if (!isAllowedFile(file.name, file.type)) {
+      if (uploadedPaths.length > 0) {
+        await supabase.storage.from("session-files").remove(uploadedPaths);
+      }
       return NextResponse.json(
         { error: `File type not supported: "${file.name}"` },
         { status: 400 }
@@ -118,11 +125,16 @@ export async function POST(request: Request) {
 
     if (uploadError) {
       console.error("Storage upload error:", uploadError);
+      if (uploadedPaths.length > 0) {
+        await supabase.storage.from("session-files").remove(uploadedPaths);
+      }
       return NextResponse.json(
         { error: `Failed to upload "${file.name}"` },
         { status: 500 }
       );
     }
+
+    uploadedPaths.push(storagePath);
 
     // Save metadata to database
     const { data: fileRecord, error: dbError } = await supabase
@@ -139,8 +151,8 @@ export async function POST(request: Request) {
 
     if (dbError) {
       console.error("DB insert error:", dbError);
-      // Try to clean up the uploaded file
-      await supabase.storage.from("session-files").remove([storagePath]);
+      // Roll back all uploaded storage files
+      await supabase.storage.from("session-files").remove(uploadedPaths);
       return NextResponse.json(
         { error: `Failed to save file record for "${file.name}"` },
         { status: 500 }
