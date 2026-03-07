@@ -6,9 +6,19 @@ import { NextResponse } from "next/server";
 const BASE_PATH = "/mvp";
 
 export async function GET(request: Request) {
-  const { searchParams, origin } = new URL(request.url);
+  const requestUrl = new URL(request.url);
+  const { searchParams } = requestUrl;
   const code = searchParams.get("code");
   const next = searchParams.get("next") ?? "/";
+
+  // On Cloudflare Pages, request.url may reflect the internal worker URL rather
+  // than the public domain. Prefer NEXT_PUBLIC_SITE_URL when set, then fall back
+  // to the x-forwarded-host header that Cloudflare injects with the real host.
+  const host =
+    request.headers.get("x-forwarded-host") ?? requestUrl.host;
+  const origin =
+    process.env.NEXT_PUBLIC_SITE_URL ??
+    `${requestUrl.protocol}//${host}`;
 
   if (code) {
     const { supabase, applyResponseCookies } = createRouteHandlerClient(request);

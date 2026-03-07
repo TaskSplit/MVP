@@ -31,6 +31,7 @@ export default function AuthPage() {
         setError(error.message);
       } else {
         window.location.href = "/mvp/";
+        return; // prevent setLoading(false) running before navigation commits
       }
     } else {
       const { error } = await supabase.auth.signUp({
@@ -48,10 +49,11 @@ export default function AuthPage() {
 
   const handleGoogleAuth = async () => {
     setError(null);
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? window.location.origin;
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${window.location.origin}/mvp/auth/callback`,
+        redirectTo: `${siteUrl}/mvp/auth/callback`,
       },
     });
     if (error) {
