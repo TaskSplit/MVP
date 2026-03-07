@@ -153,7 +153,7 @@ export function PlitChat({
           <>
             {/* Plit avatar placeholder */}
             <div className="h-7 w-7 rounded-md bg-accent/40 border border-accent/60 flex items-center justify-center text-xs font-bold text-white">
-              P
+              <img src="public\Plit.png" alt="Plit" />
             </div>
             <span className="hidden sm:inline">Ask Plit</span>
             <MessageCircle className="h-4 w-4 sm:hidden" />

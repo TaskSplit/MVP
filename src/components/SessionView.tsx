@@ -5,7 +5,7 @@ import { Session, RoundWithSteps, SessionFile } from "@/lib/types/database";
 import { ProgressBar } from "@/components/ProgressBar";
 import { RoundCircleNav } from "@/components/RoundCircleNav";
 import { RoundDetailView } from "@/components/RoundDetailView";
-import { Loader2, ChevronLeft, ChevronRight, CheckCircle2, RotateCcw, FileText, Paperclip } from "lucide-react";
+import { Loader2, ChevronLeft, ChevronRight, CheckCircle2, RotateCcw, FileText, Paperclip, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { SessionStatus } from "@/lib/types/database";
 import { PlitChat } from "@/components/PlitChat";
@@ -23,6 +23,7 @@ export function SessionView({ session, rounds: initialRounds, files = [] }: Sess
   const [error, setError] = useState<string | null>(null);
   const [status, setStatus] = useState<SessionStatus>(session.status ?? "active");
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const router = useRouter();
 
   // Check if we need to generate the breakdown (no rounds yet)
@@ -85,6 +86,21 @@ export function SessionView({ session, rounds: initialRounds, files = [] }: Sess
       // Silently fail
     } finally {
       setIsUpdatingStatus(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!confirm("Delete this task? This cannot be undone.")) return;
+    setIsDeleting(true);
+    try {
+      await fetch("/mvp/api/sessions", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sessionId: session.id }),
+      });
+      router.push("/");
+    } catch {
+      setIsDeleting(false);
     }
   };
 
@@ -210,16 +226,30 @@ export function SessionView({ session, rounds: initialRounds, files = [] }: Sess
             )}
             <div className="mb-6" />
           </div>
-          {!isCompleted && rounds.length > 0 && (
+          <div className="flex items-center gap-2 shrink-0">
+            {!isCompleted && rounds.length > 0 && (
+              <button
+                onClick={() => handleStatusChange("completed")}
+                disabled={isUpdatingStatus}
+                className="flex items-center gap-2 rounded-lg bg-success/20 px-4 py-2 text-sm font-semibold text-success transition-all hover:bg-success/30 disabled:opacity-50"
+              >
+                <CheckCircle2 className="h-4 w-4" />
+                Finish Task
+              </button>
+            )}
             <button
-              onClick={() => handleStatusChange("completed")}
-              disabled={isUpdatingStatus}
-              className="shrink-0 flex items-center gap-2 rounded-lg bg-success/20 px-4 py-2 text-sm font-semibold text-success transition-all hover:bg-success/30 disabled:opacity-50"
+              onClick={handleDelete}
+              disabled={isDeleting}
+              className="flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-sm text-muted transition-all hover:border-danger/30 hover:text-danger hover:bg-danger/10 disabled:opacity-50"
+              title="Delete task"
             >
-              <CheckCircle2 className="h-4 w-4" />
-              Finish Task
+              {isDeleting ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Trash2 className="h-4 w-4" />
+              )}
             </button>
-          )}
+          </div>
         </div>
         <ProgressBar completed={completedSteps} total={totalSteps} />
       </div>

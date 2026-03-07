@@ -48,6 +48,36 @@ export async function POST(request: Request) {
   return applyResponseCookies(NextResponse.json({ sessionId: session.id }));
 }
 
+export async function DELETE(request: Request) {
+  const { supabase, applyResponseCookies } = createRouteHandlerClient(request);
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const { sessionId } = await request.json();
+
+  if (!sessionId) {
+    return NextResponse.json({ error: "sessionId is required" }, { status: 400 });
+  }
+
+  const { error } = await supabase
+    .from("sessions")
+    .delete()
+    .eq("id", sessionId)
+    .eq("user_id", user.id);
+
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  return applyResponseCookies(NextResponse.json({ success: true }));
+}
+
 export async function PATCH(request: Request) {
   const { supabase, applyResponseCookies } = createRouteHandlerClient(request);
 
