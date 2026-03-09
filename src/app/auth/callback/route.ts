@@ -16,9 +16,10 @@ export async function GET(request: Request) {
   // to the x-forwarded-host header that Cloudflare injects with the real host.
   const host =
     request.headers.get("x-forwarded-host") ?? requestUrl.host;
-  const origin =
+  const origin = (
     process.env.NEXT_PUBLIC_SITE_URL ??
-    `${requestUrl.protocol}//${host}`;
+    `${requestUrl.protocol}//${host}`
+  ).replace(/\/+$/, "");
 
   if (code) {
     const { supabase, applyResponseCookies } = createRouteHandlerClient(request);
