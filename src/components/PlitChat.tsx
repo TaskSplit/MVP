@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { RoundWithSteps, SessionFile } from "@/lib/types/database";
 import { cn } from "@/lib/utils";
+import Image from "next/image";
 import { Send, X, Loader2, MessageCircle } from "lucide-react";
 
 interface PlitMessage {
@@ -153,7 +154,7 @@ export function PlitChat({
           <>
             {/* Plit avatar */}
             <div className="h-7 w-7 rounded-md overflow-hidden border border-accent/60 flex items-center justify-center">
-              <img src="/Plit.png" alt="Plit" className="h-full w-full object-cover" />
+              <Image src="/Plit.png" alt="Plit" width={28} height={28} className="h-full w-full object-cover" />
             </div>
             <span className="hidden sm:inline">Ask Plit</span>
             <MessageCircle className="h-4 w-4 sm:hidden" />
@@ -175,7 +176,7 @@ export function PlitChat({
         <div className="flex items-center gap-3 border-b border-border px-4 py-3 bg-card/80 backdrop-blur-md">
           {/* Plit avatar */}
           <div className="h-9 w-9 rounded-lg overflow-hidden border border-accent/50 flex items-center justify-center">
-            <img src="/Plit.png" alt="Plit" className="h-full w-full object-cover" />
+            <Image src="/Plit.png" alt="Plit" width={36} height={36} className="h-full w-full object-cover" />
           </div>
           <div className="flex-1 min-w-0">
             <h3 className="text-sm font-semibold text-foreground">Plit</h3>
@@ -201,7 +202,7 @@ export function PlitChat({
             >
               {msg.role === "assistant" && (
                 <div className="mt-1 h-6 w-6 shrink-0 rounded-md overflow-hidden border border-accent/40">
-                  <img src="/Plit.png" alt="Plit" className="h-full w-full object-cover" />
+                  <Image src="/Plit.png" alt="Plit" width={24} height={24} className="h-full w-full object-cover" />
                 </div>
               )}
               <div
@@ -220,7 +221,7 @@ export function PlitChat({
           {isLoading && (
             <div className="flex gap-2 justify-start">
               <div className="mt-1 h-6 w-6 shrink-0 rounded-md overflow-hidden border border-accent/40">
-                <img src="/Plit.png" alt="Plit" className="h-full w-full object-cover" />
+                <Image src="/Plit.png" alt="Plit" width={24} height={24} className="h-full w-full object-cover" />
               </div>
               <div className="bg-card border border-border rounded-xl rounded-bl-sm px-3 py-2">
                 <div className="flex gap-1">
