@@ -7,9 +7,10 @@ import Link from "next/link";
 
 interface NavbarProps {
   userEmail?: string;
+  isGuest?: boolean;
 }
 
-export function Navbar({ userEmail }: NavbarProps) {
+export function Navbar({ userEmail, isGuest }: NavbarProps) {
   const router = useRouter();
   const supabase = createClient();
 
@@ -28,10 +29,10 @@ export function Navbar({ userEmail }: NavbarProps) {
           </span>
         </Link>
 
-        {userEmail && (
+        {(userEmail || isGuest) && (
           <div className="flex items-center gap-4">
             <span className="hidden text-sm text-muted sm:block">
-              {userEmail}
+              {isGuest ? "Guest" : userEmail}
             </span>
             <button
               onClick={handleSignOut}

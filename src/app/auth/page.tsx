@@ -4,7 +4,7 @@ export const runtime = 'edge';
 
 import { useState, useMemo } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { Mail, Lock, Loader2, Zap } from "lucide-react";
+import { Mail, Lock, Loader2, Zap, UserRound } from "lucide-react";
 
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
@@ -45,6 +45,18 @@ export default function AuthPage() {
       }
     }
     setLoading(false);
+  };
+
+  const handleGuestAuth = async () => {
+    setLoading(true);
+    setError(null);
+    const { error } = await supabase.auth.signInAnonymously();
+    if (error) {
+      setError(error.message);
+      setLoading(false);
+    } else {
+      window.location.href = "/mvp/";
+    }
   };
 
   const handleGoogleAuth = async () => {
@@ -173,6 +185,19 @@ export default function AuthPage() {
             </svg>
             Continue with Google
           </button>
+
+          {/* Guest */}
+          <button
+            onClick={handleGuestAuth}
+            disabled={loading}
+            className="mt-3 flex w-full items-center justify-center gap-3 rounded-lg border border-border bg-card px-4 py-2.5 font-medium text-foreground transition-colors hover:bg-card-hover hover:border-accent/30"
+          >
+            <UserRound className="h-5 w-5 text-muted" />
+            Continue as Guest
+          </button>
+          <p className="mt-2 text-center text-xs text-muted/60">
+            Guest accounts are limited to 1 session
+          </p>
 
           {/* Toggle mode */}
           <p className="mt-6 text-center text-sm text-muted">

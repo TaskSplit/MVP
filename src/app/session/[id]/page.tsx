@@ -26,6 +26,8 @@ export default async function SessionPage({ params }: SessionPageProps) {
     redirect("/auth");
   }
 
+  const isGuest = user.is_anonymous ?? false;
+
   // Fetch session
   const { data: session } = await supabase
     .from("sessions")
@@ -62,7 +64,7 @@ export default async function SessionPage({ params }: SessionPageProps) {
 
   return (
     <div className="min-h-screen">
-      <Navbar userEmail={user?.email} />
+      <Navbar userEmail={user?.email} isGuest={isGuest} />
 
       <main className="mx-auto max-w-4xl px-4 py-8 sm:px-6">
         <Link

@@ -35,7 +35,7 @@ export default async function DashboardPage() {
 
   return (
     <div className="min-h-screen">
-      <Navbar userEmail={user?.email} />
+      <Navbar userEmail={user?.email} isGuest={user?.is_anonymous ?? false} />
 
       <main className="mx-auto max-w-4xl px-4 py-12 sm:px-6">
         {/* Hero prompt section */}

@@ -18,6 +18,21 @@ export async function POST(request: Request) {
   const limited = rateLimit(user.id, "sessions", { maxRequests: 10, windowSec: 60 });
   if (limited) return limited;
 
+  // Guest users (anonymous) are limited to 1 session
+  if (user.is_anonymous) {
+    const { count } = await supabase
+      .from("sessions")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", user.id);
+
+    if ((count ?? 0) >= 1) {
+      return NextResponse.json(
+        { error: "Guest accounts are limited to 1 session. Sign up for unlimited access." },
+        { status: 403 }
+      );
+    }
+  }
+
   const { prompt } = await request.json();
 
   if (!prompt || typeof prompt !== "string") {
