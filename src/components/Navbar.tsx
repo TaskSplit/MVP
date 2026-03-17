@@ -22,11 +22,8 @@ export function Navbar({ userEmail, isGuest }: NavbarProps) {
   return (
     <nav className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-lg">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
-        <Link href="/" className="flex items-center gap-2">
-          <Zap className="h-6 w-6 text-accent" />
-          <span className="text-xl font-bold text-foreground">
-            Task<span className="text-accent">Split</span>
-          </span>
+        <Link href="/" className="flex items-center font-bold text-2xl tracking-tighter cursor-pointer">
+          Task<span style={{ color: '#E9D5FF' }}>Split</span>
         </Link>
 
         {(userEmail || isGuest) && (
