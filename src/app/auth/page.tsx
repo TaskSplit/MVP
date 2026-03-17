@@ -62,11 +62,11 @@ export default function AuthPage() {
   const handleGoogleAuth = async () => {
     setError(null);
     const { error } = await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: {
-        redirectTo: `${window.location.origin}/mvp/auth/callback`,
-      },
-    });
+  provider: 'google',
+  options: {
+    redirectTo: 'https://tasksplitai.com/mvp/auth/callback'
+  }
+  });
     if (error) {
       setError(error.message);
     }
