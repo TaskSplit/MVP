@@ -53,21 +53,20 @@ export default async function FinishPage({ params }: FinishPageProps) {
           You have successfully completed <strong className="text-foreground">{session.title || "your task"}</strong>. Take a moment to celebrate this achievement. You crushed it!
         </p>
 
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full justify-center max-w-md">
-          <Link
-            href="/"
-            className="btn-primary w-full sm:w-auto flex-1 flex items-center justify-center gap-2 py-3.5 text-base sm:whitespace-nowrap"
-          >
-            <Home className="h-5 w-5" />
-            Go to Home
-          </Link>
-          
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full justify-center max-w-md">        
           <Link
             href={`/session/${id}`}
             className="flex w-full sm:w-auto flex-1 items-center justify-center gap-2 rounded-xl border border-border bg-card px-6 py-3.5 text-base font-medium text-foreground transition-all hover:bg-card-hover hover:border-accent/30 sm:whitespace-nowrap"
           >
             <ArrowLeft className="h-5 w-5 text-muted" />
             Go Back
+          </Link>
+          <Link
+            href="/"
+            className="btn-primary w-full sm:w-auto flex-1 flex items-center justify-center gap-2 py-3.5 text-base sm:whitespace-nowrap"
+          >
+            <Home className="h-5 w-5" />
+            Go to Home
           </Link>
         </div>
       </main>
