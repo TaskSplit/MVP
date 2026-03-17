@@ -70,6 +70,16 @@ export function SessionView({ session, rounds: initialRounds, files = [] }: Sess
 
   const isCompleted = status === "completed";
 
+  useEffect(() => {
+    if (totalSteps > 0) {
+      if (completedSteps === totalSteps && status !== "completed") {
+        handleStatusChange("completed");
+      } else if (completedSteps < totalSteps && status === "completed") {
+        handleStatusChange("active");
+      }
+    }
+  }, [completedSteps, totalSteps, status]);
+
   const handleStatusChange = async (newStatus: SessionStatus) => {
     setIsUpdatingStatus(true);
     try {
@@ -80,7 +90,11 @@ export function SessionView({ session, rounds: initialRounds, files = [] }: Sess
       });
       if (res.ok) {
         setStatus(newStatus);
-        router.refresh();
+        if (newStatus === "completed") {
+          router.push(`/session/${session.id}/finish`);
+        } else {
+          router.refresh();
+        }
       }
     } catch {
       // Silently fail
@@ -183,24 +197,6 @@ export function SessionView({ session, rounds: initialRounds, files = [] }: Sess
 
   return (
     <div>
-      {/* Completed banner */}
-      {isCompleted && (
-        <div className="mb-6 flex items-center justify-between rounded-lg border border-success/20 bg-success/10 px-5 py-3">
-          <span className="flex items-center gap-2 text-sm font-medium text-success">
-            <CheckCircle2 className="h-4 w-4" />
-            This task is finished
-          </span>
-          <button
-            onClick={() => handleStatusChange("active")}
-            disabled={isUpdatingStatus}
-            className="flex items-center gap-1.5 rounded-md px-3 py-1 text-xs font-medium text-muted hover:text-foreground transition-colors"
-          >
-            <RotateCcw className="h-3.5 w-3.5" />
-            Reopen
-          </button>
-        </div>
-      )}
-
       {/* Header */}
       <div className="mb-8">
         <div className="flex items-start justify-between gap-4">
