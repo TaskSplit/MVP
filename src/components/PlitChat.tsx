@@ -34,7 +34,7 @@ export function PlitChat({
     {
       role: "assistant",
       content:
-        "Hey! I'm Plit, your task assistant. I can help you if you're stuck on a step, or regenerate parts of your breakdown if something doesn't fit. What do you need?",
+        "Hey! I'm Plit, your task assistant. I can help you if you're stuck on a step, or regenerate parts of your breakdown if something doesn't fit.\n\nTell us how it went: https://tally.so/r/1AEbYg",
     },
   ]);
   const [input, setInput] = useState("");
@@ -206,13 +206,27 @@ export function PlitChat({
               )}
               <div
                 className={cn(
-                  "max-w-[80%] rounded-xl px-3 py-2 text-sm leading-relaxed",
+                  "max-w-[80%] rounded-xl px-3 py-2 text-sm leading-relaxed whitespace-pre-wrap break-words",
                   msg.role === "user"
                     ? "bg-accent text-white rounded-br-sm"
                     : "bg-card border border-border text-foreground rounded-bl-sm"
                 )}
               >
-                {msg.content}
+                {msg.content.split(/(https?:\/\/[^\s]+)/g).map((part, pIndex) =>
+                  part.match(/^https?:\/\//) ? (
+                    <a
+                      key={pIndex}
+                      href={part}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="underline underline-offset-2 hover:text-accent-light transition-colors"
+                    >
+                      {part}
+                    </a>
+                  ) : (
+                    part
+                  )
+                )}
               </div>
             </div>
           ))}
