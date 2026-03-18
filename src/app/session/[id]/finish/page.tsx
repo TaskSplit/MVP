@@ -52,6 +52,17 @@ export default async function FinishPage({ params }: FinishPageProps) {
         <p className="mb-12 max-w-lg text-lg text-muted/90">
           You have successfully completed <strong className="text-foreground">{session.title || "your task"}</strong>. Take a moment to celebrate this achievement. You crushed it!
         </p>
+        
+        <div className="mt-12">
+          <a
+            href="https://tally.so/r/1AEbYg"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-sm text-muted hover:text-accent-light underline underline-offset-4 transition-colors"
+          >
+            Tell us how it went.
+          </a>
+        </div>
 
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full justify-center max-w-md">        
           <Link
