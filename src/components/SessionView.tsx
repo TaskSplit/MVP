@@ -82,6 +82,14 @@ export function SessionView({ session, rounds: initialRounds, files = [] }: Sess
 
   const handleStatusChange = async (newStatus: SessionStatus) => {
     setIsUpdatingStatus(true);
+    
+    // Optimistic redirect: jump to finish page quickly without waiting for the network call
+    if (newStatus === "completed") {
+      setTimeout(() => {
+        router.push(`/session/${session.id}/finish`);
+      }, 300);
+    }
+
     try {
       const res = await fetch("/mvp/api/sessions", {
         method: "PATCH",
@@ -90,9 +98,7 @@ export function SessionView({ session, rounds: initialRounds, files = [] }: Sess
       });
       if (res.ok) {
         setStatus(newStatus);
-        if (newStatus === "completed") {
-          router.push(`/session/${session.id}/finish`);
-        } else {
+        if (newStatus !== "completed") {
           router.refresh();
         }
       }
@@ -119,6 +125,25 @@ export function SessionView({ session, rounds: initialRounds, files = [] }: Sess
   };
 
   const handleStepToggle = async (stepId: string, isCompleted: boolean) => {
+    // Check if checking this step will complete the currently active round
+    const currentActiveRoundData = rounds[activeRound];
+    let justCompletedRound = false;
+
+    if (currentActiveRoundData && isCompleted) {
+      const thisStep = currentActiveRoundData.steps.find((s) => s.id === stepId);
+      if (thisStep) {
+        const otherSteps = currentActiveRoundData.steps.filter(
+          (s) => s.id !== stepId
+        );
+        const othersAllCompleted =
+          otherSteps.length === 0 || otherSteps.every((s) => s.is_completed);
+        
+        if (othersAllCompleted) {
+          justCompletedRound = true;
+        }
+      }
+    }
+
     // Optimistic update
     setRounds((prev) =>
       prev.map((r) => ({
@@ -128,6 +153,13 @@ export function SessionView({ session, rounds: initialRounds, files = [] }: Sess
         ),
       }))
     );
+
+    // Auto-advance to next round if applicable
+    if (justCompletedRound && activeRound < rounds.length - 1) {
+      setTimeout(() => {
+        setActiveRound((prev) => Math.min(rounds.length - 1, prev + 1));
+      }, 500); // 500ms delay to let user see the final checkmark
+    }
 
     try {
       const res = await fetch("/mvp/api/steps", {
